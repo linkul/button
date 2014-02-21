@@ -1,75 +1,321 @@
-Buttons
+handlebars介绍
 =======
 
-Buttons is A fully customizable CSS button library built using Sass & Compass, created by [Alex Wolfe](https://twitter.com/alexwolfe)
+Handlebars是JavaScript一个语义模板库，通过对view和data的分离来快速构建Web模板。它采用”Logic-less template“（无逻辑模版）的思路，在加载时被预编译，而不是到了客户端执行到代码时再去编译，这样可以保证模板加载和运行的速度
 
-You can start by [viewing live examples on the Buttons Website](http://alexwolfe.github.io/Buttons/).
-
-![Example of Buttons](https://dl.dropboxusercontent.com/u/1517246/buttons.png)
-
-
-There is also a [Ruby Gem Friendly Version](https://github.com/rajahafify/buttons-rails)
-
-Setup & Installation
+基本语法
 ====================
 
-1. [Download Buttons](https://github.com/alexwolfe/Buttons/raw/gh-pages/Buttons.zip) and add files to your website.
-2. Include css in the head of your webpage. *You only need the font-awesome css if you're using icons*
-    `<link rel="stylesheet" href="css/font-awesome.min.css">`
-    `<link rel="stylesheet" href="css/buttons.css">`
-3. Include jQuery and buttons.js if you're using dropdown menu buttons.
-    `<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>`
-    `<script type="text/javascript" src="js/buttons.js"></script>`
-4. Create buttons in your html. [View code examples here](http://alexwolfe.github.io/Buttons/).
+使用方法是加两个花括号{{value}}, handlebars模板会自动匹配相应的数值
 
-Customize Buttons
+例如:
+
+handlebars模板
+
+```
+ <table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>项目名称</th>
+            <th>创建时间</th>
+        </tr>
+    </thead>
+    <tbody>
+    {{#this}}
+        <tr>
+            <td>{{id}}</td>
+            <td>{{name}}</td>
+            <td>{{createAt}}</td>
+        </tr>
+    {{/this}}
+    </tbody>
+</table>
+```
+
+json
+
+```
+[{
+    "name":"kelude2",
+    "id":"1",
+    "createAt":"2014/02/17"
+},
+{
+    "name":"kelude3",
+    "id":"2",
+    "createAt":"2014/02/18"
+}]  
+```
+
+js handelbars预编译
+
+```
+;(function($){
+    var template = Handlebars.compile(source); //模板文件
+    $("body").append(template(data)) //返回预编译后的dom  ，data  json数据 
+}(jQuery)) 
+
+```
+
+[在线模板调试](http://g.assets.daily.taobao.net/platform/kelude-static/2-kui/tool/tools.html)
+
+
+block
+====================
+有时候当你需要对某条表达式进行更深入的操作时，就需要Blocks来支持，在Handlebars中，你可以在表达式后面跟随一个#号来表示Blocks，然后通过{{/表达式}}来结束Blocks。如果当前的表达式是一个数组，则Handlebars会“自动展开数组”，并将Blocks的上下文设为数组中的项目，让我们来看看下面的例子，例如：{{@index}}
+
+```
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>项目名称</th>
+            <th>创建时间</th>
+        </tr>
+    </thead>
+    <tbody>
+    {{#this}}
+        <tr>
+            <td>{{id}}</td>
+            <td>{{name}}</td>
+            <td>{{createAt}}</td>
+        </tr>
+    {{/this}}
+    </tbody>
+</table>
+```
+
+```
+[{
+    "name":"kelude2",
+    "id":"1",
+    "createAt":"2014/02/17"
+},
+{
+    "name":"kelude3",
+    "id":"2",
+    "createAt":"2014/02/18"
+}]  
+```
+[在线模板调试](http://g.assets.daily.taobao.net/platform/kelude-static/2-kui/tool/tools.html)
+
+内置block helper
 ====================
 
-1. Clone the Buttons repo
-2. Make sure you have Sass and Compass installed.
-3. Edit the _options.scss with your own custom values (see values below)
-4. Run the *compass watch* command root of the Buttons directory from the command line.
-5. The buttons.css file should now be updated
+* each
 
+你可以使用内置的{{#each}}{{/each}} helper遍历列表块内容。
 
-General Options
----------------
+当对象为数组的时候用*this*来引用遍历的元素，用*@index* 来引用索引
 
-In order to edit your options simple option the *_options.scss* file. After you make your
-edits run *compass watch* in the root of the button directory and the updates should take place.
-You can use index.html to view your changes.
+当对象是Object对象的时候可以用*@key*来引用对象的key值，*this* 来引用对象value值
 
-* **$namespace:**  Desired CSS namespace for your buttons (default .button)
-* **$glow_namespace:** Desired CSS namespace for your glow effect (default .glow)
-* **$glow_color:** Default glow color (#2c9adb, light blue)
-* **$bgcolor:** Default button background color (#EEE, light gray)
-* *** *$height:** Default height, also used to calculate padding on the sides (32px)
-* **$font-color:** Default font color (#666, gray)
-* **$font-size:** Default font size (14px)
-* **$font-weight:** Default font weight (300)
-* **$font-family:**  Default font family ("HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif)
+可以配合{{else}}来做未空判断，输出默认元素
 
+例子：
 
-Advanced Options
-----------------
+handlebars
 
-The only option you should adjust here is the button actions. When you need to add/remove/edit another button
-color simple add/remove/edit on of the items in the list. There is not limit to the number of items in your list. Each
-item will create a new button.
+```
+{{#each tester}}
+    <tr>
+        <td>{{@index}}</td>
+        <td>{{this}}</td>
+    </tr>
+{{else}}
+    <tr>
+        <td colspan="2">测试人员未配置</td>
+    </tr>
+{{/each}}
 
-* **$button_actions:** Edit this to add new buttons ('name' background-color font-color) example: ('highlight' #F18D05 #FFF) ('caution' #E54028 #FFF)
-* **$button_styles:** Correspond to the styles avaialble ('rounded' 'pill' 'circle')
-* **$button_sizes:** Correspond to the sizes avaialble ('large' 'small' 'tiny')
-* **$circle-size:** Radius for circle buttons, circles only have one size (120px)
+{{#each developer}}
+    <tr>
+        <td>{{@index}}</td>
+        <td>{{@key}}</td>
+        <td>{{this}}</td>
+    </tr>
+{{else}}
+    <tr>
+        <td colspan="2">开发人员未配置</td>
+    </tr>
+{{/each}}
+```
 
-* **$dropdown-background:** Backround color of dropdown menu
-* **$dropdown-link-color:** Link color in dropdown menu
-* **$dropdown-link-hover:** Hover color for link in dropdown menu
-* **$dropdown-link-hover-background:** Background hover color for link in dropdown menu
+json
 
-created with by [@alexwolfe](https://twitter.com/alexwolfe) at [@adroll](https://twitter.com/adroll)
+```
+{
+  "tester": [
+    "习木",
+    "2月21号",
+    "2014年"
+  ],
+  "developer":{
+    "name":"习木",
+    "birthday":"2月21号",
+    "year":"2014年"
+  }
+}
+```
+[在线模板调试](http://g.assets.daily.taobao.net/platform/kelude-static/2-kui/tool/each.html)
 
+* if/unless else
 
-Browser Support
+{{#if param}} {{/if}}helper 你可以指定条件渲染dom，如果它的参数返回false，undefined, null, “” 或者 [] ,Handlebar将不会渲染DOM，如果存在{{else}}则执行{{else}}后面的渲染;
+
+unless是反向的if语法也就是当判断的值为false时他会渲染DOM
+
+```
+{{#if tester}}
+    ....
+{{else}}
+    ....
+{{/if}}
+
+{{#unless tester}}
+    ....
+{{else}}
+    ....
+{{/unless}}
+```
+
+[在线模板调试](http://g.assets.daily.taobao.net/platform/kelude-static/2-kui/tool/if.html)
+
+* with 
+
+Handlebars模板会在编译的阶段的时候进行context传递和赋值。使用with的方法，我们可以将context转移到数据的一个section里面（如果你的数据包含section）。这个方法在操作复杂的template时候非常有用。
+
+handlebars
+
+```
+{{#with developer}}
+    <tr>
+        <td>{{@index}}</td>
+        <td>{{@key}}</td>
+        <td>{{this}}</td>
+    </tr>
+{{else}}
+    <tr>
+        <td colspan="2">开发人员未配置</td>
+    </tr>
+{{/with}}
+```
+
+json
+
+```
+{
+  "tester": [
+    "习木",
+    "2月21号",
+    "2014年"
+  ],
+  "developer":{
+    "name":"习木",
+    "birthday":"2月21号",
+    "year":"2014年"
+  }
+}
+```
+
+[在线模板调试](http://g.assets.daily.taobao.net/platform/kelude-static/2-kui/tool/with.html)
+
+自定义block helper
 ====================
-Buttons works in All modern browsers (Firefox, Chrome, Safari, IE) and gracefully degrades all the way down to Internet Explorer 8.
+
+可以从任何上下文可以访问在一个模板，你可以使用”Handlebars.registerHelper”方法来注册一个helper。有两种类型的帮手，你可以使Function helper 和block helper。
+
+Function helper 基本上都是定时功能，一旦注册，可以在你的模板中的任何地方。Handlebars写入到模板函数的返回值
+
+block helper 在本质上相似if each with 内置块助手，允许改变内容里的值它的辅助和辅助函数的名称作为registerHelper的参数
+
+```
+[{
+    "name":"kelude2",
+    "id":"1",
+    "createAt":"2014/02/17"
+},
+{
+    "name":"kelude3",
+    "id":"2",
+    "createAt":"2014/02/18"
+},
+"sub":[{
+        "name":"kelude3",
+        "id":"2",
+        "createAt":"2014/02/18"
+    },
+    {
+        "name":"kelude3",
+        "id":"2",
+        "createAt":"2014/02/18"
+    },
+    {
+        "name":"kelude3",
+        "id":"2",
+        "createAt":"2014/02/18"
+    }]
+] 
+```
+
+handlebars模板
+
+```
+{{#this}}
+    <tr>
+        <td>{{id}}</td>
+        <td>{{name}}</td>
+        <td>{{createAt}}</td>
+    </tr>
+{{/this}}
+
+{{#sub}}
+    <tr>
+        <td>{{id}}</td>
+        <td>{{projectname name}}</td>
+        <td>{{createAt}}</td>
+    </tr>
+{{/sub}}
+
+{{#list sub}}
+    <tr>
+        <td>{{id}}</td>
+        <td>{{projectname name}}</td>
+        <td>{{createAt}}</td>
+    </tr>
+{{/list}}
+
+```
+
+Function helper
+
+```
+Handlebars.registerHelper("projectname", function(projectname) {
+    return '<a href="#">'+projectname+'</a>'
+})
+
+```
+
+Block helper
+
+```
+Handlebars.registerHelper("list", function(items, options) {
+  var out = "<ul>";
+  for(var i=0, l=items.length; i<l; i++) {
+    out = out + "<li>" + options.fn(items[i]) + "</li>";
+  }
+  return out + "</ul>";
+})
+
+```
+[在线模板调试](http://g.assets.daily.taobao.net/platform/kelude-static/2-kui/tool/custom.html)
+
+其他知识点
+====================
+
+* **{{this}}** 数据块的当前上下文
+* **{{../name}}** json块向上引用
+* **{{this/name}}**，**{{this.name}}**，**{{./name}}** json块向下应用
+* **Handlebars.SafeString**  输出安全的html，html标签<>会被转义
+* **Handlebars.Utils.escapeExpression()** 转义特殊字符
